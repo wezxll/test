@@ -66,7 +66,8 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
             }
         }
     } else {
-        err = stub.PutState("company"+args[0], args[1])
+      
+        err = stub.PutState("company"+args[0], []bytes(string(args[1])))
         if err != nil {
             return nil, errors.New("PutState Error"+err.Error())
         }
@@ -87,7 +88,7 @@ func writeCompany(stub *shim.ChaincodeStub, cp Company) (error) {
 }
 
 func writeCompany2(stub *shim.ChaincodeStub, cp Company) (error) {
-    err := stub.PutState("company"+cp.Name, cp.Balance)
+    err := stub.PutState("company"+cp.Name, []bytes(string(strconv.Itoa(cp.Balance))))
     if err != nil {
         return errors.New("PutState Error" + err.Error())
     }
@@ -149,7 +150,7 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
       if err != nil {
           return nil, errors.New("Query company Error"+err.Error())
       }
-      return []byte(balance), nil
+      return []byte(strconv.Itoa(balance)), nil
     } else {
         return nil, errors.New("Incorrect function name")
     }
@@ -179,7 +180,7 @@ func getCompanyByName2(stub *shim.ChaincodeStub, name string) (int, error) {
         return nil, errors.New("GetState Error"+err.Error())
     }
     if balance == nil {
-        return nil, errors.New("nil for "+name)
+        return 0, errors.New("nil for "+name)
     }
     return balance, nil
 }
