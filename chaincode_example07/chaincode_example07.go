@@ -57,7 +57,7 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
             return nil, errors.New("Expecting integer value for company balance.")
         }
         cpNo++
-        cp = Company{Name: cpName, Balance: cpBal, id: cpId}
+        cp = Company{Name: cpName, Balance: cpBal, Id: cpId}
         err = writeCompany(stub, cp)
         if err != nil {
             return nil, errors.New("writeCompany Error" + err.Error())
@@ -116,9 +116,14 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
     }
     if funcName == "company" {
         var cpBytes []byte
-        cpBytes, err := getCompanyByName(stub, "company"+args[0])
+        var cp      Company
+        cp, err := getCompanyByName(stub, "company"+args[0])
         if err != nil {
             return nil, errors.New("Query company Error"+err.Error())
+        }
+        cpBytes, err = json.Marshal(&cp)
+        if err != nil {
+            return nil, errors.New("Marshal company Error"+err.Error())
         }
         return cpBytes, nil
     } else {
@@ -126,7 +131,7 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
     }
 }
 
-func getCompanyByName(stub *shim.ChaincodeStub, name string) ([]byte, error) {
+func getCompanyByName(stub *shim.ChaincodeStub, name string) (Company, error) {
     cpBytes, err := stub.GetState("company"+name)
     if err != nil {
         return nil, errors.New("GetState Error"+err.Error())
@@ -134,5 +139,10 @@ func getCompanyByName(stub *shim.ChaincodeStub, name string) ([]byte, error) {
     if cpBytes == nil {
         return nil, errors.New("Nil for "+name)
     }
-    return cpBytes, nil
+    var cp Company
+    err = json.Unmarshal(cpBytes, &cp)
+    if err != nil {
+        return nil, errors.New("Unmarshal Error"+err.Error())
+    }
+    return cp, nil
 }
