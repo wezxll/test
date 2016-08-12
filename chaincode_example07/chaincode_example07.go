@@ -94,8 +94,8 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, funcName string, args
         if err != nil {
             return nil, err
         }
-        from.balance -= x
-        to.balance   += x
+        from.Balance -= x
+        to.Balance   += x
         err = writeCompany(stub, from)
         if err != nil {
             return nil, err
@@ -133,16 +133,16 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
 
 func getCompanyByName(stub *shim.ChaincodeStub, name string) (Company, error) {
     cpBytes, err := stub.GetState("company"+name)
+    var cp Company
     if err != nil {
-        return nil, errors.New("GetState Error"+err.Error())
+        return cp, errors.New("GetState Error"+err.Error())
     }
     if cpBytes == nil {
-        return nil, errors.New("Nil for "+name)
+        return cp, errors.New("Nil for "+name)
     }
-    var cp Company
     err = json.Unmarshal(cpBytes, &cp)
     if err != nil {
-        return nil, errors.New("Unmarshal Error"+err.Error())
+        return cp, errors.New("Unmarshal Error"+err.Error())
     }
     return cp, nil
 }
