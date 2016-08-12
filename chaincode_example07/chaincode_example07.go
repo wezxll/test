@@ -50,18 +50,25 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
     var cpId   int
     var cp     Company
     var err    error
-    for i := 0; i < len(args); i+=2 {
-        cpName = args[i]
-        cpId   = cpNo
-        cpBal, err = strconv.Atoi(args[i+1])
-        if err != nil {
-            return nil, errors.New("Expecting integer value for company balance.")
+    if funcName != "init" {
+        for i := 0; i < len(args); i+=2 {
+            cpName = args[i]
+            cpId   = cpNo
+            cpBal, err = strconv.Atoi(args[i+1])
+            if err != nil {
+                return nil, errors.New("Expecting integer value for company balance.")
+            }
+            cpNo++
+            cp = Company{Name: cpName, Balance: cpBal, Id: cpId}
+            err = writeCompany(stub, cp)
+            if err != nil {
+                return nil, errors.New("writeCompany Error" + err.Error())
+            }
         }
-        cpNo++
-        cp = Company{Name: cpName, Balance: cpBal, Id: cpId}
-        err = writeCompany(stub, cp)
+    } else {
+        err = stub.PutState("company"+args[0], args[1])
         if err != nil {
-            return nil, errors.New("writeCompany Error" + err.Error())
+            return nil, errors.New("PutState Error"+err.Error())
         }
     }
     return nil, nil
@@ -73,6 +80,14 @@ func writeCompany(stub *shim.ChaincodeStub, cp Company) (error) {
         return err
     }
     err = stub.PutState("company"+cp.Name, cpBytes)
+    if err != nil {
+        return errors.New("PutState Error" + err.Error())
+    }
+    return nil
+}
+
+func writeCompany2(stub *shim.ChaincodeStub, cp Company) (error) {
+    err := stub.PutState("company"+cp.Name, cp.Balance)
     if err != nil {
         return errors.New("PutState Error" + err.Error())
     }
@@ -127,6 +142,14 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
             return nil, errors.New("Marshal company Error"+err.Error())
         }
         return cpBytes, nil
+    } else if funcName == "company2" {
+      var balance int
+      var err     error
+      balance, err = getCompanyByName2(stub, "company"+args[0])
+      if err != nil {
+          return nil, errors.New("Query company Error"+err.Error())
+      }
+      return []byte(balance), nil
     } else {
         return nil, errors.New("Incorrect function name")
     }
@@ -146,4 +169,17 @@ func getCompanyByName(stub *shim.ChaincodeStub, name string) (Company, error) {
         return cp, errors.New("Unmarshal Error"+err.Error())
     }
     return cp, nil
+}
+
+func getCompanyByName2(stub *shim.ChaincodeStub, name string) (int, error) {
+    var balance int
+    var err     error
+    balance, err = stub.GetState("company"+name)
+    if err != nil {
+        return nil, errors.New("GetState Error"+err.Error())
+    }
+    if balance == nil {
+        return nil, errors.New("nil for "+name)
+    }
+    return balance, nil
 }
