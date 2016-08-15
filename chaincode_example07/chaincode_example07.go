@@ -144,16 +144,14 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
         }
         return cpBytes, nil
     } else if funcName == "company2" {
-      //var balance int
-      var err     error
-      var balByte []byte
-      //balance, err = getCompanyByName2(stub, "company"+args[0])
-      //if err != nil {
-        //  return nil, errors.New("Query company Error"+err.Error())
-      //}
-      //return []byte(strconv.Itoa(balance)), nil
-      balByte, err = stub.GetState("companya")
-      return balByte, err
+      var balance int
+     
+      balance, err = getCompanyByName2(stub, "company"+args[0])
+      if err != nil {
+        return nil, errors.New("Query company Error"+err.Error())
+      }
+      return []byte(strconv.Itoa(balance)), nil
+      
     } else {
         return nil, errors.New("Incorrect function name")
     }
@@ -179,7 +177,7 @@ func getCompanyByName2(stub *shim.ChaincodeStub, name string) (int, error) {
     var balByte []byte
     var balance int
     var err     error
-    balByte, err = stub.GetState("company"+name)
+    balByte, err = stub.GetState(name)
     if err != nil {
         return 0, errors.New("GetState Error"+err.Error())
     }
