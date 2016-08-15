@@ -183,6 +183,9 @@ func getCompanyByName2(stub *shim.ChaincodeStub, name string) (int, error) {
     if balByte == nil {
         return 0, errors.New("nil for "+name)
     }
-    balance = strconv.Atoi(string(balByte))
-    return balance, nil
+    balance, err = strconv.Atoi(string(balByte))
+    if err != nil {
+        return balance, nil
+    }
+    return 0, errors.New("Error when convert to int"+err.Error())
 }
