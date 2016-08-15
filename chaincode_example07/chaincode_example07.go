@@ -173,14 +173,16 @@ func getCompanyByName(stub *shim.ChaincodeStub, name string) (Company, error) {
 }
 
 func getCompanyByName2(stub *shim.ChaincodeStub, name string) (int, error) {
+    var balByte []byte
     var balance int
     var err     error
-    balance, err = stub.GetState("company"+name)
+    balByte, err = stub.GetState("company"+name)
     if err != nil {
-        return nil, errors.New("GetState Error"+err.Error())
+        return 0, errors.New("GetState Error"+err.Error())
     }
-    if balance == nil {
+    if balByte == nil {
         return 0, errors.New("nil for "+name)
     }
+    balance = int(string(balByte))
     return balance, nil
 }
