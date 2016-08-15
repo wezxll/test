@@ -33,7 +33,7 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
         name, asset := args[i], args[i+1]
         err := stub.PutState(name, []byte(asset))
         if err != nil {
-            return nil, errors.New("PutState Error: "+args[0]+" "args[1])
+            return nil, errors.New("PutState Error: "+args[0]+" "+args[1])
         }
     }
     return nil, nil
@@ -96,3 +96,4 @@ func getAsset(stub *shim.ChaincodeStub, args string) ([]byte, error) {
     }
     return assetByte, nil
 }
+
