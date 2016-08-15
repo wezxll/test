@@ -67,7 +67,7 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
         }
     } else {
       
-        err = stub.PutState("company"+args[0], []bytes(string(args[1])))
+        err = stub.PutState("company"+args[0], []byte(args[1]))
         if err != nil {
             return nil, errors.New("PutState Error"+err.Error())
         }
@@ -88,7 +88,7 @@ func writeCompany(stub *shim.ChaincodeStub, cp Company) (error) {
 }
 
 func writeCompany2(stub *shim.ChaincodeStub, cp Company) (error) {
-    err := stub.PutState("company"+cp.Name, []bytes(string(strconv.Itoa(cp.Balance))))
+    err := stub.PutState("company"+cp.Name, []byte(strconv.Itoa(cp.Balance)))
     if err != nil {
         return errors.New("PutState Error" + err.Error())
     }
