@@ -153,7 +153,7 @@ func (t *SimpleChaincode) Query(stub *shim.ChaincodeStub, funcName string, args 
       //}
       //return []byte(strconv.Itoa(balance)), nil
       balByte, err = stub.GetState("companya")
-      return balByte err
+      return balByte, err
     } else {
         return nil, errors.New("Incorrect function name")
     }
