@@ -1,7 +1,6 @@
 package main
 
 import (
-    "encoding/json"
     "errors"
     "fmt"
     "strconv"
@@ -32,9 +31,9 @@ func (t *SimpleChaincode) Init(stub *shim.ChaincodeStub, funcName string, args [
     }
     for i := 0; i < len(args); i = i+2 {
         name, asset := args[i], args[i+1]
-        err := stub.PutState(name, asset)
+        err := stub.PutState(name, []byte(asset))
         if err != nil {
-            return nil, errors.New("PutState Error: %s, %s", args[i], args[i+1])
+            return nil, errors.New("PutState Error: "+args[0]+" "args[1])
         }
     }
     return nil, nil
@@ -45,7 +44,7 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, funcName string, args
         return nil, errors.New("Incorrect number of arguments. Expecting 3.")
     }
     from, to := args[0], args[1]
-    val := strconv.Atoi(args[2])
+    val, _ := strconv.Atoi(args[2])
     var (
         fromByte  []byte
         toByte    []byte
@@ -57,22 +56,22 @@ func (t *SimpleChaincode) Invoke(stub *shim.ChaincodeStub, funcName string, args
     if err != nil {
         return nil, err
     }
-    fromAsset = strconv.Atoi(string(fromByte))
+    fromAsset, _ = strconv.Atoi(string(fromByte))
     toByte, err = getAsset(stub, to)
     if err != nil {
         return nil, err
     }
-    toAsset = strconv.Atoi(string(toByte))
+    toAsset, _ = strconv.Atoi(string(toByte))
 
     fromAsset, toAsset = fromAsset-val, toAsset+val
 
     err = stub.PutState(from, []byte(strconv.Itoa(fromAsset)))
     if err != nil {
-        return nil, errors.New("PutState Error: %s", args[0])
+        return nil, errors.New("PutState Error: "+args[0])
     }
     err = stub.PutState(to, []byte(strconv.Itoa(toAsset)))
     if err != nil {
-        return nil, errors.New("PutState Error: %s", args[1])
+        return nil, errors.New("PutState Error: "+args[1])
     }
     return nil, nil
 }
